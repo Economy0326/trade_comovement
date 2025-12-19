@@ -75,14 +75,14 @@ Score = 0.6 × F1 + 0.4 × (1 − NMAE)
 공행성 정답이 제공되지 않는 조건에서, 최종 제출 모델은 다음 파이프라인을 사용한다.
 
 ```mermaid
-flowchart LR;
-A[train.csv] --> B[월별 집계 & Pivot];
-B --> C[모든 pair A to B];
-C --> D[lag corr (1..MAX_LAG)];
-D --> E[abs(corr) Top-K 선택];
-E --> F[Linear Regression];
-F --> G[MA3 baseline blending];
-G --> H[submission.csv 저장];
+flowchart LR
+A[train.csv] --> B[월별 집계 및 Pivot]
+B --> C[모든 pair A to B]
+C --> D[lag corr 1 to MAX_LAG]
+D --> E[abs corr Top K 선택]
+E --> F[Linear Regression]
+F --> G[MA3 blending]
+G --> H[submission.csv 저장]
 ```
 
 ### 3.1 Pair 탐색: 시차(lag) 기반 상관
@@ -142,9 +142,10 @@ b[t+1] : follower 다음달 값
 # 회귀 입력: follower의 최근값 + leader의 lag 반영값
 X.append([b[t], b[t-1], a[t-lag]])
 y.append(b[t+1])  # 다음달 follower 값
+```
+
 모델은 LinearRegression()을 사용하였다.
 또한 예측값의 이상치/변동성을 완화하기 위해 follower의 MA3 baseline과 블렌딩하였다.
-```
 
 최종 예측:
 
@@ -194,14 +195,14 @@ trade_comovement/
 ```
 python src/run_final.py
 ```
-> 실행 결과: outputs/baseline_corr_034.csv 생성
+> 실행 결과: output/baseline_corr_034.csv 생성
 
 실험 모델 실행:
 
 ```
 python src/run_exp_xgb.py
 ```
-> 실행 결과: outputs/baseline_corr_034.csv 생성
+> 실행 결과: output/exp_xgb_tau022_k3000.csv 생성
 
 ---
 
@@ -241,7 +242,7 @@ python src/run_exp_xgb.py
 2) Granger causality / permutation test 등 방향성 강화
 3) 회귀 모델을 XGBRegressor/LightGBM으로 확장 + clip/log 타깃 적용
 
-8. 결론
+## 8. 결론
 본 프로젝트는 시차 기반 상관 분석으로 공행성 pair를 탐색하고,
 선택된 pair에 대해 선형회귀 + MA3 블렌딩으로 다음달 무역량을 예측하였다.
 
